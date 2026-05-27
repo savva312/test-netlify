@@ -18,7 +18,7 @@ const notes = [
 
 app.get("/", (c) => c.text("hello"));
 
-app.get("/notes", (c) => c.json(notes));
+app.post("/notes/:id", (c) => c.json(notes));
 
 export default app;
 

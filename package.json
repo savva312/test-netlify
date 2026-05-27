@@ -20,6 +20,7 @@
   "type": "module",
   "dependencies": {
     "@hono/node-server": "^2.0.4",
-    "hono": "^4.12.23"
+    "hono": "^4.12.23",
+    "readline-sync": "^1.4.10"
   }
 }
