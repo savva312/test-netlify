@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Notes App</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>Simple Notes App (EJS + Database)</h1>
+
+  <form action="/add" method="POST">
+    <input name="noteTitle" type="text" placeholder="Note title" required>
+    <textarea name="noteContent" rows="3" placeholder="Note content" required></textarea>
+    <button type="submit">Add Note</button>
+  </form>
+
+  <p>Total notes: <strong><%= notes.length %></strong></p>
+
+  <ul id="notes-list">
+    <% notes.forEach(note => { %>
+      <li class="note-item">
+        <h3><%= note.name %></h3>
+        <p><%= note.content %></p>
+        <small>ID: <%= note.number %></small>
+        
+        <form action="/delete" method="POST" style="margin-top: 10px;">
+          <input type="hidden" name="noteId" value="<%= note._id %>">
+          <button type="submit" style="background-color: #ff4d4d; color: white; border: none; cursor: pointer;">Delete</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+
+</body>
+</html>
