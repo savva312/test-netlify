@@ -1,0 +1,19 @@
+{
+  "name": "test-netlify",
+  "version": "1.0.0",
+  "description": "Simple browser-only notes app",
+  "private": true,
+  "scripts": {
+    "start": "echo \"Open index.html in your browser\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.1.1",
+      "onFail": "download"
+    }
+  }
+}
