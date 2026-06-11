@@ -10,6 +10,7 @@ mongoose.connect('mongodb://localhost:21017/notesDB')
 
 // 2. Το Σχέδιο (Schema) της Βάσης
 const noteSchema = new mongoose.Schema({
+  user: String,
   number: Number,
   name: String,
   content: String
@@ -26,43 +27,55 @@ app.use(express.urlencoded({ extended: true })); // Για να διαβάζει
 // 4. ΔΙΑΔΡΟΜΕΣ (ROUTES)
 
 // Αρχική Σελίδα: Διαβάζει τις σημειώσεις από τη βάση και τις δείχνει
-app.get('/', async (req, res) => {
-  try {
-    const allNotes = await Note.find(); // Παίρνει ΟΛΕΣ τις σημειώσεις από τη βάση
-    res.render('index', { notes: allNotes }); // Τις στέλνει στο index.ejs
-  } catch (err) {
-    res.status(500).send("Error fetching notes");
-  }
+// 1. ΝΕΟ ROUTE: Εμφανίζει τη σελίδα Login όταν μπαίνεις στο localhost:3000
+app.get('/', (req, res) => {
+  res.render('login');
 });
 
-// Προσθήκη Σημείωσης: Παίρνει τα δεδομένα από τη φόρμα και τα σώζει στη βάση
+// 2. ΑΛΛΑΓΗ ROUTE: Η σελίδα των σημειώσεων φιλτράρει πλέον βάσει χρήστη
+app.get('/notes', async (req, res) => {
+  const currentUser = req.query.user; // Διαβάζει το ?user=... από το URL
+  
+  if (!currentUser) {
+    return res.redirect('/'); // Αν δεν επέλεξε όνομα, γυρίζει στο login
+  }
+
+  // Βρίσκει ΜΟΝΟ τις σημειώσεις που έχουν το όνομα του τρέχοντος χρήστη
+  const userNotes = await Note.find({ user: currentUser });
+  
+  res.render('index', { 
+    notes: userNotes, 
+    currentUser: currentUser 
+  });
+});
+
+// 3. ΑΛΛΑΓΗ ROUTE: Η προσθήκη σημείωσης αποθηκεύει και τον χρήστη
 app.post('/add', async (req, res) => {
-  try {
-    const totalNotes = await Note.countDocuments();
-    
-    const newNote = new Note({
-      number: totalNotes + 1,
-      name: req.body.noteTitle,
-      content: req.body.noteContent
-    });
+  const currentUser = req.query.user; 
+  if (!currentUser) return res.redirect('/');
 
-    await newNote.save(); // Αποθήκευση στη βάση για πάντα!
-    res.redirect('/');    // Ανανέωση της σελίδας
-  } catch (err) {
-    res.status(500).send("Error saving note");
-  }
+  const count = await Note.countDocuments();
+  
+  const newNote = new Note({
+    user: currentUser, // <-- Αποθηκεύεται το όνομα αυτού που τη γράφει
+    name: req.body.noteTitle,
+    content: req.body.noteContent,
+    number: count + 1
+  });
+
+  await newNote.save();
+  res.redirect(`/notes?user=${currentUser}`); // Επιστροφή στις σημειώσεις του
 });
 
-// Διαγραφή Σημείωσης: Βρίσκει τη σημείωση με το ID της και τη σβήνει
+// 4. ΑΛΛΑΓΗ ROUTE: Η διαγραφή
 app.post('/delete', async (req, res) => {
-  try {
-    const idToDelete = req.body.noteId;
-    await Note.findByIdAndDelete(idToDelete); // Σβήσιμο από τη βάση
-    res.redirect('/');
-  } catch (err) {
-    res.status(500).send("Error deleting note");
-  }
+  const currentUser = req.query.user;
+  if (!currentUser) return res.redirect('/');
+  
+  await Note.findByIdAndDelete(req.body.noteId);
+  res.redirect(`/notes?user=${currentUser}`); // Επιστροφή στις σημειώσεις του
 });
+
 
 // Ξεκινάει ο server στην πόρτα 3000
 app.listen(3000, () => {
