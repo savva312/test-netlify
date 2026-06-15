@@ -13,7 +13,7 @@ const notes = [
   },
   {
     id: 3,
-    name: "Note 5",
+    name: "Note 4",
     content: "This is the third note",
   },
 ];
